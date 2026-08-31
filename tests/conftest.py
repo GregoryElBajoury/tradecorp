@@ -18,5 +18,4 @@ def spark():
     
     yield spark_session
     
-    # Nettoyage après le test
     spark_session.stop()
