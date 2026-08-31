@@ -31,6 +31,7 @@ tradecorp/
 ├── docker-compose.yml       # Configuration des services Docker (Spark / Jupyter / PostgreSQL)
 ├── run_tests.sh             # Script d'automatisation pour lancer les tests
 └── .env                     # Variables d'environnement - ignoré par Git
+├── .env.example             # Modèle de variables d'environnement (versionné)
 ```
 
 ##  Stack Technique
@@ -46,14 +47,21 @@ tradecorp/
 
 ## Utilisation et Commandes
 
-1. Lancer l'environnement Docker
+### 1. Configuration de l'environnement
+Avant de lancer les conteneurs, dupliquez le modèle de configuration et remplissez les valeurs de vos variables :
+```bash
+cp .env.example .env
+```
+N.B : Pensez à renseigner vos propres valeurs de configuration dans le fichier .env nouvellement créé.
+
+### 2. Lancer l'environnement Docker
 Démarre les conteneurs du projet :
 
 ```bash
 docker compose up -d
 ```
 
-2. Exécuter les tests unitaires
+### 3. Exécuter les tests unitaires
 Le projet intègre une suite de tests unitaires validant les différentes fonctions de transformation.
 On peut lancer l'ensemble des tests via le script dédié :
 
