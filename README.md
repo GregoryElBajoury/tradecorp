@@ -11,6 +11,6 @@ En cours
 - `tests/` : Tests unitaires avec Pytest.
 
 ##  Prochaines étapes
-- [ ] Note de cadrage & Estimation Azure Pricing
-- [ ] Infrastructure Docker / Spark / PostgreSQL
-- [ ] Implémentation des notebooks et des modules Python
+- [x] Note de cadrage & Estimation Azure Pricing
+- [x] Infrastructure Docker / Spark / PostgreSQL
+- [x] Implémentation des notebooks et des modules Python
