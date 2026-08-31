@@ -1,0 +1,11 @@
+# Fichiers d'environnement
+.env
+
+# Dossier de données génerées et temporaires
+data/output/
+data/tmp/
+
+# Caches Python et répertoire de tests
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/

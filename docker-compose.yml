@@ -1,0 +1,40 @@
+services:
+  spark:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    container_name: tradecorp_spark
+    ports:
+      - "8889:8888"
+      - "4041:4040"
+    volumes:
+      - ./data:/home/jovyan/data
+      - ./notebooks:/home/jovyan/work
+      - ./src:/home/jovyan/src
+      - ./tests:/home/jovyan/tests
+    environment:
+      PYSPARK_SUBMIT_ARGS: "--packages org.postgresql:postgresql:42.7.0 pyspark-shell"
+
+  postgres:
+    image: postgres:16
+    container_name: tradecorp_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: tradecorp_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "8082:80"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
