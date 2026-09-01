@@ -1,6 +1,8 @@
 services:
   spark:
-    image: jupyter/pyspark-notebook:spark-3.5.0
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: tradecorp_spark
     ports:
       - "8889:8888"
@@ -10,12 +12,16 @@ services:
       - ./notebooks:/home/jovyan/work
       - ./src:/home/jovyan/src
       - ./tests:/home/jovyan/tests
+    env_file:
+      - .env
     environment:
       PYSPARK_SUBMIT_ARGS: "--packages org.postgresql:postgresql:42.7.0 pyspark-shell"
 
   postgres:
     image: postgres:16
     container_name: tradecorp_postgres
+    env_file:
+      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -28,6 +34,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: tradecorp_pgadmin
+    env_file:
+      - .env
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}

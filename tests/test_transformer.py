@@ -10,7 +10,7 @@ spark.createDataFrame(...)
 from datetime import date
 from transformer import clean_orders
 
-def test_clean_orders(spark):  # <- On injecte la fixture 'spark' ici
+def test_clean_orders(spark):  # Injecte la fixture 'spark' ici
     # Une ligne avec une date valide et une ligne avec shipped_date à None (qui doit être supprimée)
     data = [
         (1, date(2026, 1, 1), date(2026, 1, 5)),

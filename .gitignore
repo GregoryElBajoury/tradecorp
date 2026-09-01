@@ -1,6 +1,6 @@
 # Fichiers d'environnement
 .env
-
+.env.example
 # Dossier de données génerées et temporaires
 data/output/
 data/tmp/

@@ -1,0 +1,6 @@
+pyspark==3.5.0
+pytest==9.1.1
+python-dotenv==1.0.1
+azure-storage-blob==12.19.0
+
+# docker exec -it tradecorp_spark pip install -r requirements.txt
