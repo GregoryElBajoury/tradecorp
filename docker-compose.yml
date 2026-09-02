@@ -12,6 +12,7 @@ services:
       - ./notebooks:/home/jovyan/work
       - ./src:/home/jovyan/src
       - ./tests:/home/jovyan/tests
+      - ./data/tmp/tradecorp_raw:/home/jovyan/data/tmp/tradecorp_raw
     env_file:
       - .env
     environment:

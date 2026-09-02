@@ -13,7 +13,7 @@ from transformer import add_sous_total
 def test_add_sous_total(spark):  # <- On injecte la fixture 'spark' ici
     # Données de test basées sur l'indice : 10.0 * 2 * (1 - 0.1) = 18.0
     data = [(10.0, 2, 0.1)]
-    columns = ["unit_price", "quantity", "discount"]
+    columns = ["prix_unitaire", "quantite", "discount"]
     
     df_test = spark.createDataFrame(data, columns)
     df_result = add_sous_total(df_test)
