@@ -7,6 +7,9 @@ from transformer import build_enriched
 from enrichment import enrich_with_currency
 from writer import write_clean_data_to_azure
 
+# Désactive le vomi de logs d'Azure et de Spark pour ne garder que la creme                
+logging.getLogger("azure").setLevel(logging.WARNING)
+
 # Configuration du logging structuré et horodaté
 logging.basicConfig(
     level=logging.INFO,
@@ -14,6 +17,8 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger("TradeCorpPipeline")
+logging.getLogger("org.apache.spark").setLevel(logging.ERROR)
+logging.getLogger("org.apache.hadoop").setLevel(logging.ERROR)
 
 
 def run_pipeline():
@@ -24,6 +29,8 @@ def run_pipeline():
     spark = SparkSession.builder \
         .appName("TradeCorpPipelineExecution") \
         .getOrCreate()
+    sc = spark.sparkContext
+    sc.setLogLevel("ERROR")  # pas d erreur c est lesieur
     
     try:
         # 2. Étape de Reader : Téléchargement et chargement des CSV/JSON bruts et de référence
@@ -49,8 +56,8 @@ def run_pipeline():
         raise
         
     finally:
-        logger.info("Pause de 5 minutes pour consulter la Spark UI sur http://localhost:4041...")
-        time.sleep(300)
+      # logger.info("Pause de 5 minutes pour consulter la Spark UI sur http://localhost:4041...")
+      # time.sleep(300)
 
         # Arrêt propre de Spark garanti
         logger.info("Arrêt propre de la session Spark.")
