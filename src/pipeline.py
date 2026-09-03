@@ -1,5 +1,6 @@
 import logging
 import sys
+import time
 from pyspark.sql import SparkSession
 from reader import load_raw_data_to_spark
 from transformer import build_enriched
@@ -25,19 +26,19 @@ def run_pipeline():
         .getOrCreate()
     
     try:
-        # 2. Étape de lecture (Reader) : Téléchargement et chargement des CSV/JSON bruts et de référence
+        # 2. Étape de Reader : Téléchargement et chargement des CSV/JSON bruts et de référence
         logger.info("--- ÉTAPE 1 : Lecture des données brutes et de référence ---")
         dfs = load_raw_data_to_spark(spark)
         
-        # 3. Étape de transformation (Transformer) : Nettoyage et jointures des tables métier
+        # 3. Étape de Transformer : Nettoyage et jointures des tables métier
         logger.info("--- ÉTAPE 2 : Transformation et construction du modèle enrichi ---")
         df_enriched = build_enriched(dfs)
         
-        # 4. Étape d'enrichissement (Enrichment) : Ajout de la devise et du sous_total_local
+        # 4. Étape d'Enrichment : Ajout de la devise et du sous_total_local
         logger.info("--- ÉTAPE 3 : Enrichissement des devises (sous_total_local) ---")
         df_final = enrich_with_currency(df_enriched, dfs)
         
-        # 5. Étape d'écriture (Writer) : Export en Parquet local puis téléversement dans le conteneur clean
+        # 5. Étape de Writer : Export en Parquet local puis téléversement dans le conteneur clean
         logger.info("--- ÉTAPE 4 : Écriture vers la zone clean d'ADLS Gen2 ---")
         write_clean_data_to_azure(df_final, container_name="clean", dataset_name="tradecorp_enriched")
         
@@ -48,6 +49,9 @@ def run_pipeline():
         raise
         
     finally:
+        logger.info("Pause de 5 minutes pour consulter la Spark UI sur http://localhost:4041...")
+        time.sleep(300)
+
         # Arrêt propre de Spark garanti
         logger.info("Arrêt propre de la session Spark.")
         spark.stop()
