@@ -1,0 +1,6 @@
+# Jalon 3 - AirFlow
+apache-airflow-providers-docker
+apache-airflow-providers-docker
+requests==2.31.0
+azure-storage-blob==12.19.0
+python-dotenv==1.0.1

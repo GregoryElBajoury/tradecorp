@@ -71,8 +71,32 @@ def build_enriched(dataframes: dict) -> DataFrame:
     )
     
     return df_final
+# Ajout maj airflow
+if __name__ == "__main__":
+    from pyspark.sql import SparkSession
+    from reader import load_raw_data_to_spark
+    from enrichment import enrich_with_currency
+
+    spark = SparkSession.builder.appName("TradeCorpTransformer").getOrCreate()
+    
+    print("Chargement des données brutes...")
+    dfs = load_raw_data_to_spark(spark)
+    
+    print("Construction et enrichissement du DataFrame...")
+    df_enriched = build_enriched(dfs)
+    df_final = enrich_with_currency(df_enriched, dfs)
+    
+    output_local_path = "/home/jovyan/data/tmp/tradecorp_enriched_local"
+    print(f"Écriture locale du résultat intermédiaire : {output_local_path}")
+    df_final.write.mode("overwrite").parquet(output_local_path)
+    
+    spark.stop()
 
 
+
+
+
+"""
 if __name__ == "__main__":
     # Test local ou dans le conteneur du transformateur
     from pyspark.sql import SparkSession
@@ -93,3 +117,5 @@ if __name__ == "__main__":
     
     print(f"Aperçu des premières lignes ({df_enriched.count()} lignes au total) :")
     df_enriched.show(5, truncate=False)
+
+"""

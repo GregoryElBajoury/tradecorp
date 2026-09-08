@@ -1,0 +1,10 @@
+FROM apache/airflow:2.8.0
+
+# Copie et installation en une seule couche avec nettoyage immédiat
+COPY --chown=airflow:root requirements-airflow.txt /tmp/requirements-airflow.txt
+
+RUN pip install --no-cache-dir -r /tmp/requirements-airflow.txt \
+    && rm -rf /tmp/requirements-airflow.txt ~/.cache/pip
+
+# Bascule explicite sur l'utilisateur non-privilégié
+USER airflow

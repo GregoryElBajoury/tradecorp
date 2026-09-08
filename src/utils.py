@@ -1,9 +1,6 @@
 import os
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
-from pyspark.sql import DataFrame
-from pyspark.sql.functions import col, initcap, lit, lower, round, trim, upper, when
-from pyspark.sql.types import DateType, DoubleType, IntegerType
 
 load_dotenv()
 
@@ -25,10 +22,10 @@ def download_blob_to_local(blob_service_client: BlobServiceClient, container_nam
         download_file.write(blob_client.download_blob().readall())
 
 
-# --- FONCTIONS DE NETTOYAGE PAR TABLE ---
+# --- FONCTIONS DE NETTOYAGE PAR TABLE (Imports PySpark locaux) ---
 
-def clean_customers(df: DataFrame) -> DataFrame:
-    """Nettoie la table des clients : trim, normalisation et déduplication."""
+def clean_customers(df):
+    from pyspark.sql.functions import col, initcap, trim, upper
     return (
         df.withColumn("company_name", trim(col("company_name")))
           .withColumn("contact_name", initcap(trim(col("contact_name"))))
@@ -37,8 +34,9 @@ def clean_customers(df: DataFrame) -> DataFrame:
     )
 
 
-def clean_orders(df: DataFrame) -> DataFrame:
-    """Nettoie la table des commandes : filtrage des non-livrées, retypage et renommage."""
+def clean_orders(df):
+    from pyspark.sql.functions import col, when
+    from pyspark.sql.types import DateType, DoubleType
     return (
         df.filter(col("shipped_date").isNotNull())
           .withColumn("order_date", col("order_date").cast(DateType()))
@@ -50,8 +48,9 @@ def clean_orders(df: DataFrame) -> DataFrame:
     )
 
 
-def clean_order_details(df: DataFrame) -> DataFrame:
-    """Nettoie le détail des lignes de commande et renomme les colonnes en français."""
+def clean_order_details(df):
+    from pyspark.sql.functions import col
+    from pyspark.sql.types import DoubleType, IntegerType
     return (
         df.withColumn("unit_price", col("unit_price").cast(DoubleType()))
           .withColumn("quantity", col("quantity").cast(IntegerType()))
@@ -61,16 +60,16 @@ def clean_order_details(df: DataFrame) -> DataFrame:
     )
 
 
-def add_sous_total(df: DataFrame) -> DataFrame:
-    """Calcule le sous-total d'une ligne de commande (prix × quantité × (1 - remise))."""
+def add_sous_total(df):
+    from pyspark.sql.functions import col, lit, round
     return df.withColumn(
         "sous_total",
         round(col("prix_unitaire") * col("quantite") * (lit(1) - col("discount")), 2)
     )
 
 
-def clean_employees(df: DataFrame) -> DataFrame:
-    """Filtre les colonnes utiles des employés et crée full_name."""
+def clean_employees(df):
+    from pyspark.sql.functions import col, lit, trim
     cols_to_keep = ["employee_id", "first_name", "last_name", "title", "hire_date", "city", "country"]
     return (
         df.select([c for c in cols_to_keep if c in df.columns])
@@ -78,14 +77,13 @@ def clean_employees(df: DataFrame) -> DataFrame:
     )
 
 
-def clean_products(df: DataFrame) -> DataFrame:
-    """Nettoie la table des produits, convertit le prix et ajoute l'indicateur de stock."""
+def clean_products(df):
+    from pyspark.sql.functions import col, when
+    from pyspark.sql.types import DoubleType
     return (
         df.withColumn("unit_price", col("unit_price").cast(DoubleType()))
           .withColumn("en_stock", when(col("units_in_stock") > 0, True).otherwise(False))
     )
-
-# Verification
-print(f"Compte de stockage : {os.getenv('AZURE_STORAGE_ACCOUNT_NAME')}")
-print(f"Clé de stockage présente : {bool(os.getenv('AZURE_STORAGE_ACCOUNT_KEY'))}")
-
+if __name__ == "__main__":
+    print(f"Compte de stockage : {os.getenv('AZURE_STORAGE_ACCOUNT_NAME')}")
+    print(f"Clé de stockage présente : {bool(os.getenv('AZURE_STORAGE_ACCOUNT_KEY'))}")

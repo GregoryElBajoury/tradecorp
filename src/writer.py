@@ -4,8 +4,14 @@ from utils import get_blob_service_client
 
 
 def upload_directory_to_azure(blob_service_client, container_name: str, local_dir: str, remote_dir: str):
-    """Parcourt un dossier local (contenant les fichiers Parquet de Spark) et les envoie vers Azure."""
+    """Nettoie l'ancien dossier distant puis envoie les nouveaux fichiers Parquet vers Azure."""
     container_client = blob_service_client.get_container_client(container_name)
+    
+    # 1. Suppression des anciens blobs du dossier distant pour garantir une vraie idempotence
+    print(f"Nettoyage des anciens fichiers dans Azure sous le dossier : {remote_dir}")
+    blobs_to_delete = container_client.list_blobs(name_starts_with=remote_dir)
+    for blob in blobs_to_delete:
+        container_client.delete_blob(blob.name)
     
     for root, dirs, files in os.walk(local_dir):
         for file in files:
@@ -34,8 +40,18 @@ def write_clean_data_to_azure(df: DataFrame, container_name: str = "clean", data
     upload_directory_to_azure(blob_service_client, container_name, local_tmp_path, remote_dir=dataset_name)
     
     print(f"Export de '{dataset_name}' terminé avec succès dans la zone clean !")
+# Ajour maj airflow
+if __name__ == "__main__":
+    spark = SparkSession.builder.appName("TradeCorpWriter").getOrCreate()
+    input_local_path = "/home/jovyan/data/tmp/tradecorp_enriched_local"
+    print(f"Lecture des données transformées depuis : {input_local_path}")
+    df_transformed = spark.read.parquet(input_local_path)
+    
+    write_clean_data_to_azure(df_transformed, container_name="clean", dataset_name="tradecorp_enriched")
+    
+    spark.stop()
 
-
+"""
 if __name__ == "__main__":
     # Test unitaire isolé du writer avec un faux DataFrame
     spark = SparkSession.builder \
@@ -47,3 +63,5 @@ if __name__ == "__main__":
     test_df = spark.createDataFrame(data, columns)
     
     write_clean_data_to_azure(test_df, container_name="clean", dataset_name="test_dataset")
+
+"""
